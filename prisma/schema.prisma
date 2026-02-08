@@ -1,0 +1,47 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ScoutReport {
+  id            String        @id @default(uuid())
+  source        String
+  date          DateTime
+  title         String
+  content       String
+  tweetCount    Int?
+  filePath      String?
+  createdAt     DateTime      @default(now())
+  opportunities Opportunity[]
+}
+
+model Opportunity {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  source      String
+  status      String       @default("new")
+  priority    String       @default("medium")
+  notes       String?
+  reportId    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  report      ScoutReport? @relation(fields: [reportId], references: [id])
+}
+
+model Build {
+  id          String    @id @default(uuid())
+  projectName String
+  status      String
+  prdContent  String?
+  deployUrl   String?
+  queuedAt    DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
