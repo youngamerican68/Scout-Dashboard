@@ -95,10 +95,18 @@ function parseMarkdownReport(content) {
 
     const sectionBody = section.replace(/^#{1,3}\s*.+\n/, '').trim();
     if (sectionBody.length > 20) {
-      // Determine priority from content
-      let priority = 'medium';
-      if (/build now|high priority|urgent|hot/i.test(section)) priority = 'high';
-      if (/low priority|maybe|someday/i.test(section)) priority = 'low';
+      // Determine priority from Clawdbot's Priority: line, or fallback to keyword detection
+      let priority = 'explore';
+      const priorityLine = section.match(/Priority:\s*(?:🔴|🟡|⚪|🟢)?\s*(.+)/i);
+      if (priorityLine) {
+        const p = priorityLine[1].toLowerCase();
+        if (/build now|immediate/i.test(p)) priority = 'build_now';
+        else if (/monitor|watch|track/i.test(p)) priority = 'monitor';
+        else if (/explore|investigate|research/i.test(p)) priority = 'explore';
+      } else {
+        if (/build now|high priority|urgent/i.test(section)) priority = 'build_now';
+        if (/low priority|maybe|someday|monitor/i.test(section)) priority = 'monitor';
+      }
 
       opportunities.push({
         title: heading.replace(/^\d+\.\s*/, ''),
@@ -129,7 +137,7 @@ function parseJsonReport(content) {
       title: (item.title || item.name || item.whatItIs || 'Untitled'),
       description: (item.description || item.opportunity || item.summary || ''),
       source,
-      priority: (item.priority || item.difficulty === 'easy' ? 'high' : 'medium'),
+      priority: (item.priority || item.difficulty === 'easy' ? 'build_now' : 'explore'),
     });
   }
 

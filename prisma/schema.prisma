@@ -26,7 +26,7 @@ model Opportunity {
   description String
   source      String
   status      String       @default("new")
-  priority    String       @default("medium")
+  priority    String       @default("explore")
   notes       String?
   reportId    String?
   createdAt   DateTime     @default(now())

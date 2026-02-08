@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         description: body.description ?? null,
         source: body.source ?? null,
         status: body.status ?? "new",
-        priority: body.priority ?? "medium",
+        priority: body.priority ?? "explore",
         notes: body.notes ?? null,
         reportId: body.reportId,
       },

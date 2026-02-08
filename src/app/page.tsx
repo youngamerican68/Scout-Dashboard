@@ -56,9 +56,9 @@ const statusVariant: Record<string, "default" | "success" | "warning" | "seconda
 };
 
 const priorityVariant: Record<string, "destructive" | "warning" | "secondary"> = {
-  high: "destructive",
-  medium: "warning",
-  low: "secondary",
+  build_now: "destructive",
+  explore: "warning",
+  monitor: "secondary",
 };
 
 export default function Dashboard() {
