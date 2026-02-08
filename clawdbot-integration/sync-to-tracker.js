@@ -101,9 +101,9 @@ function parseMarkdownReport(content) {
       if (priorityLine) {
         const p = priorityLine[1].toLowerCase();
         if (/build now|immediate/i.test(p)) priority = 'build_now';
-        else if (/skip|none|dismiss|not a build/i.test(p)) priority = 'skip';
-        else if (/monitor|watch|track/i.test(p)) priority = 'monitor';
         else if (/backlog|add to backlog|explore|investigate/i.test(p)) priority = 'backlog';
+        else if (/skip|none|dismiss|not a build/i.test(p)) priority = 'skip';
+        else if (/\bmonitor\b|watch|track/i.test(p)) priority = 'monitor';
       } else {
         if (/build now|high priority|urgent/i.test(section)) priority = 'build_now';
         if (/low priority|maybe|someday|monitor/i.test(section)) priority = 'monitor';
