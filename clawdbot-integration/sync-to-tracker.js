@@ -86,11 +86,18 @@ function parseMarkdownReport(content) {
 
   // Try to find structured opportunities from JSON sections or markdown lists
   const sections = content.split(/\n(?=#{1,3}\s)/);
+  let reachedEnd = false;
   for (const section of sections) {
     const sectionTitle = section.match(/^#{1,3}\s*(.+)/);
     if (!sectionTitle) continue;
 
     const heading = sectionTitle[1].trim();
+    // Stop extracting once we hit pattern summary or opportunities recap
+    if (/pattern summary|opportunities\s*\(|bottom line/i.test(heading)) {
+      reachedEnd = true;
+      continue;
+    }
+    if (reachedEnd) continue;
     // Skip meta sections
     if (/summary|overview|intro|metadata|config/i.test(heading)) continue;
 
