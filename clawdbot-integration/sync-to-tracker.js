@@ -72,9 +72,14 @@ function parseMarkdownReport(content) {
   const isPodcast = lowerContent.includes('podcast') || lowerContent.includes('transcript');
   const source = isJournal ? 'journal' : isPodcast ? 'podcast' : lowerContent.includes('discord') ? 'discord' : 'twitter';
 
-  // Count tweets/posts mentioned
-  const tweetMatch = content.match(/(\d+)\s*(tweets?|posts?|results?)/i);
+  // Count tweets/posts/transcripts mentioned
+  const tweetMatch = content.match(/(\d+)\s*(tweets?|posts?|results?|transcripts?|episodes?|papers?)/i);
   const tweetCount = tweetMatch ? parseInt(tweetMatch[1], 10) : null;
+
+  // Extract report date from content (e.g. "February 5, 2026" or "2026-02-05")
+  const dateMatch = content.match(/(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}/i)
+    || content.match(/\d{4}-\d{2}-\d{2}/);
+  const reportDate = dateMatch ? new Date(dateMatch[0]).toISOString() : null;
 
   // Extract opportunities - look for sections with BUILD NOW, HIGH, or bulleted items
   const opportunities = [];
@@ -126,7 +131,7 @@ function parseMarkdownReport(content) {
     }
   }
 
-  return { title, content, source, tweetCount, opportunities };
+  return { title, content, source, tweetCount, reportDate, opportunities };
 }
 
 // Parse JSON analysis output (from analyzer.js)
@@ -182,7 +187,7 @@ async function main() {
   // 1. Create the scout report
   const report = await post('/api/reports', {
     source: parsed.source,
-    date: new Date().toISOString(),
+    date: parsed.reportDate || new Date().toISOString(),
     title: parsed.title,
     content: parsed.content,
     tweetCount: parsed.tweetCount,
