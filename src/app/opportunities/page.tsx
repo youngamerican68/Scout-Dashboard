@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import { Lightbulb } from "lucide-react";
 import { format } from "date-fns";
+import { Markdown } from "@/components/markdown";
 
 interface Opportunity {
   id: string;
@@ -114,7 +115,7 @@ export default function OpportunitiesPage() {
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-white">{opp.title}</h3>
                     {opp.description && (
-                      <p className="text-sm text-slate-400 mt-1 whitespace-pre-wrap">{opp.description}</p>
+                      <Markdown content={opp.description} className="text-sm text-slate-400 mt-1" />
                     )}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
                       <Select

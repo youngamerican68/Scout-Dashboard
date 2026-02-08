@@ -98,7 +98,7 @@ export default function Dashboard() {
       href: "/builds",
     },
     {
-      title: "Posts Scanned",
+      title: "Tweets Scanned",
       value: stats?.totalTweetsScanned ?? 0,
       icon: MessageSquare,
       color: "text-sky-400",

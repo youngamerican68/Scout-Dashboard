@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Hash } from "lucide-react";
 import { format } from "date-fns";
+import { Markdown } from "@/components/markdown";
 
 interface Opportunity {
   id: string;
@@ -98,7 +99,7 @@ export default function ReportDetailPage() {
 
       <Card>
         <CardContent className="p-6">
-          <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{report.content}</p>
+          <Markdown content={report.content} className="text-slate-300 leading-relaxed" />
         </CardContent>
       </Card>
 
@@ -115,7 +116,7 @@ export default function ReportDetailPage() {
                     <div className="min-w-0 flex-1">
                       <h3 className="font-semibold text-white">{opp.title}</h3>
                       {opp.description && (
-                        <p className="text-sm text-slate-400 mt-1">{opp.description}</p>
+                        <Markdown content={opp.description} className="text-sm text-slate-400 mt-1" />
                       )}
                       <div className="flex items-center gap-2 mt-3">
                         <Badge variant={statusVariant[opp.status] ?? "secondary"}>
