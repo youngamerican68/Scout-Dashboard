@@ -8,8 +8,13 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const from = searchParams.get("from");
     const to = searchParams.get("to");
+    const source = searchParams.get("source");
 
     const where: Record<string, unknown> = {};
+
+    if (source) {
+      where.source = source;
+    }
 
     if (search) {
       where.OR = [

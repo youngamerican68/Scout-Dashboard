@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Hash } from "lucide-react";
 import { format } from "date-fns";
 import { Markdown } from "@/components/markdown";
+import { useScout } from "@/components/scout-tabs";
 
 interface Opportunity {
   id: string;
@@ -44,6 +45,7 @@ const priorityVariant: Record<string, "destructive" | "warning" | "secondary"> =
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { labels, scout } = useScout();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +68,7 @@ export default function ReportDetailPage() {
   if (!report) {
     return (
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => router.push("/reports")}>
+        <Button variant="ghost" onClick={() => router.push(`/reports?scout=${scout}`)}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Reports
         </Button>
         <p className="text-slate-400">Report not found.</p>
@@ -76,7 +78,7 @@ export default function ReportDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Button variant="ghost" onClick={() => router.push("/reports")} className="text-slate-400 hover:text-white">
+      <Button variant="ghost" onClick={() => router.push(`/reports?scout=${scout}`)} className="text-slate-400 hover:text-white">
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Reports
       </Button>
 
@@ -91,7 +93,7 @@ export default function ReportDetailPage() {
           {report.tweetCount != null && (
             <span className="flex items-center gap-1">
               <Hash className="h-3.5 w-3.5" />
-              {report.tweetCount} posts scanned
+              {report.tweetCount} {labels.itemLabel} scanned
             </span>
           )}
         </div>

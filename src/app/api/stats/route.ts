@@ -1,30 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const source = new URL(request.url).searchParams.get("source");
+    const reportWhere = source ? { source } : {};
+    const oppWhere = source ? { source } : {};
+
     const [totalReports, totalOpportunities, tweetAgg, reportsOverTime, activeBuildCount, recentReports, recentOpportunities] =
       await Promise.all([
-        prisma.scoutReport.count(),
+        prisma.scoutReport.count({ where: reportWhere }),
 
-        prisma.opportunity.count(),
+        prisma.opportunity.count({ where: oppWhere }),
 
         prisma.scoutReport.aggregate({
+          where: reportWhere,
           _sum: { tweetCount: true },
         }),
 
-        getReportsOverTime(),
+        getReportsOverTime(source),
 
         fetchActiveBuildCount(),
 
         prisma.scoutReport.findMany({
+          where: reportWhere,
           orderBy: { date: "desc" },
           take: 5,
           select: { id: true, title: true, source: true, date: true, _count: { select: { opportunities: true } } },
         }),
 
         prisma.opportunity.findMany({
-          where: { status: { in: ["new", "in_progress"] } },
+          where: { ...oppWhere, status: { in: ["new", "in_progress"] } },
           orderBy: [{ priority: "asc" }, { updatedAt: "desc" }],
           take: 5,
           select: { id: true, title: true, status: true, priority: true, updatedAt: true },
@@ -74,14 +80,15 @@ async function fetchActiveBuildCount(): Promise<number> {
   }
 }
 
-async function getReportsOverTime() {
+async function getReportsOverTime(source: string | null) {
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
+  const where: Record<string, unknown> = { date: { gte: sixMonthsAgo } };
+  if (source) where.source = source;
+
   const reports = await prisma.scoutReport.findMany({
-    where: {
-      date: { gte: sixMonthsAgo },
-    },
+    where,
     select: { date: true },
     orderBy: { date: "asc" },
   });

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText, Lightbulb, MessageSquare, TrendingUp } from "lucide-react";
+import { FileText, Lightbulb, MessageSquare, BookOpen, TrendingUp } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -19,6 +19,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
+import { ScoutTabs, useScout } from "@/components/scout-tabs";
 
 interface Stats {
   totalReports: number;
@@ -29,21 +30,26 @@ interface Stats {
 }
 
 export default function MetricsPage() {
+  const { sourceFilter, labels, scout } = useScout();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/stats")
+    setLoading(true);
+    fetch(`/api/stats?source=${sourceFilter}`)
       .then((res) => res.json())
       .then((data) => setStats(data?.totalReports !== undefined ? data : null))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [sourceFilter]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+      <div>
+        <ScoutTabs />
+        <div className="flex items-center justify-center h-64">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+        </div>
       </div>
     );
   }
@@ -53,10 +59,12 @@ export default function MetricsPage() {
       ? ((stats.totalOpportunities / stats.totalReports) * 100).toFixed(1)
       : "0";
 
-  const avgTweetsPerReport =
+  const avgItemsPerReport =
     stats && stats.totalReports > 0
       ? Math.round(stats.totalTweetsScanned / stats.totalReports)
       : 0;
+
+  const scanIcon = scout === "journal" ? BookOpen : MessageSquare;
 
   const metricCards = [
     {
@@ -81,9 +89,9 @@ export default function MetricsPage() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Avg Posts / Report",
-      value: avgTweetsPerReport,
-      icon: MessageSquare,
+      title: `Avg ${labels.itemLabel} / Report`,
+      value: avgItemsPerReport,
+      icon: scanIcon,
       color: "text-sky-400",
       bg: "bg-sky-500/10",
     },
@@ -91,9 +99,11 @@ export default function MetricsPage() {
 
   return (
     <div className="space-y-8">
+      <ScoutTabs />
+
       <div>
         <h1 className="text-2xl font-bold text-white">Metrics</h1>
-        <p className="text-slate-400 mt-1">Clawdbot scouting analytics and trends</p>
+        <p className="text-slate-400 mt-1">Clawdbot {labels.description} analytics</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

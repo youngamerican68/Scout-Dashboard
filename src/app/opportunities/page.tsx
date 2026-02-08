@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Lightbulb } from "lucide-react";
 import { format } from "date-fns";
 import { Markdown } from "@/components/markdown";
+import { ScoutTabs, useScout } from "@/components/scout-tabs";
 
 interface Opportunity {
   id: string;
@@ -34,6 +35,7 @@ const priorityVariant: Record<string, "destructive" | "warning" | "secondary"> =
 };
 
 export default function OpportunitiesPage() {
+  const { sourceFilter, labels, scout } = useScout();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
@@ -44,12 +46,13 @@ export default function OpportunitiesPage() {
     const params = new URLSearchParams();
     if (statusFilter) params.set("status", statusFilter);
     if (priorityFilter) params.set("priority", priorityFilter);
+    params.set("source", sourceFilter);
     fetch(`/api/opportunities?${params}`)
       .then((res) => res.json())
       .then((data) => setOpportunities(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [statusFilter, priorityFilter]);
+  }, [statusFilter, priorityFilter, sourceFilter]);
 
   useEffect(() => {
     fetchOpportunities();
@@ -73,9 +76,11 @@ export default function OpportunitiesPage() {
 
   return (
     <div className="space-y-6">
+      <ScoutTabs />
+
       <div>
         <h1 className="text-2xl font-bold text-white">Opportunities</h1>
-        <p className="text-slate-400 mt-1">Ideas and tools suggested by Clawdbot</p>
+        <p className="text-slate-400 mt-1">Ideas and tools from Clawdbot&apos;s {labels.description}</p>
       </div>
 
       <div className="flex gap-3">
@@ -139,7 +144,7 @@ export default function OpportunitiesPage() {
                       </Select>
                       {opp.report && (
                         <a
-                          href={`/reports/${opp.report.id}`}
+                          href={`/reports/${opp.report.id}?scout=${scout}`}
                           className="text-xs text-slate-500 hover:text-blue-400 transition-colors"
                         >
                           from {opp.report.title}

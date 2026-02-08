@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Lightbulb, Hammer, MessageSquare, Calendar, ArrowRight } from "lucide-react";
+import { FileText, Lightbulb, Hammer, MessageSquare, BookOpen, Calendar, ArrowRight } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -20,6 +20,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { format } from "date-fns";
+import { ScoutTabs, useScout } from "@/components/scout-tabs";
 
 interface RecentReport {
   id: string;
@@ -61,16 +62,20 @@ const priorityVariant: Record<string, "destructive" | "warning" | "secondary"> =
 };
 
 export default function Dashboard() {
+  const { sourceFilter, labels, scout } = useScout();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/stats")
+    setLoading(true);
+    fetch(`/api/stats?source=${sourceFilter}`)
       .then((res) => res.json())
       .then((data) => setStats(data?.totalReports !== undefined ? data : null))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [sourceFilter]);
+
+  const scanIcon = scout === "journal" ? BookOpen : MessageSquare;
 
   const statCards = [
     {
@@ -98,9 +103,9 @@ export default function Dashboard() {
       href: "/builds",
     },
     {
-      title: "Tweets Scanned",
+      title: labels.itemsScanned,
       value: stats?.totalTweetsScanned ?? 0,
-      icon: MessageSquare,
+      icon: scanIcon,
       color: "text-sky-400",
       bg: "bg-sky-500/10",
       href: "/metrics",
@@ -109,24 +114,29 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+      <div>
+        <ScoutTabs />
+        <div className="flex items-center justify-center h-64">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
+      <ScoutTabs />
+
       <div>
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
         <p className="text-slate-400 mt-1">
-          Overview of Clawdbot&apos;s daily scout intelligence
+          Overview of Clawdbot&apos;s {labels.description}
         </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
-          <Link key={card.title} href={card.href}>
+          <Link key={card.title} href={`${card.href}?scout=${scout}`}>
             <Card className="hover:border-slate-600 transition-colors cursor-pointer">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
@@ -150,7 +160,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-white">Latest Reports</CardTitle>
-            <Link href="/reports" className="text-xs text-slate-400 hover:text-blue-400 flex items-center gap-1">
+            <Link href={`/reports?scout=${scout}`} className="text-xs text-slate-400 hover:text-blue-400 flex items-center gap-1">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </CardHeader>
@@ -158,7 +168,7 @@ export default function Dashboard() {
             {stats?.recentReports && stats.recentReports.length > 0 ? (
               <div className="space-y-3">
                 {stats.recentReports.map((report) => (
-                  <Link key={report.id} href={`/reports/${report.id}`} className="block">
+                  <Link key={report.id} href={`/reports/${report.id}?scout=${scout}`} className="block">
                     <div className="flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-slate-700/50 transition-colors">
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-white truncate">{report.title}</p>
@@ -184,7 +194,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-white">Active Opportunities</CardTitle>
-            <Link href="/opportunities" className="text-xs text-slate-400 hover:text-blue-400 flex items-center gap-1">
+            <Link href={`/opportunities?scout=${scout}`} className="text-xs text-slate-400 hover:text-blue-400 flex items-center gap-1">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </CardHeader>
@@ -226,18 +236,8 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.reportsOverTime}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis
-                  dataKey="month"
-                  stroke="#94a3b8"
-                  fontSize={12}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={12}
-                  tickLine={false}
-                  allowDecimals={false}
-                />
+                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#1e293b",
@@ -246,12 +246,7 @@ export default function Dashboard() {
                     color: "#e2e8f0",
                   }}
                 />
-                <Bar
-                  dataKey="count"
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                  name="Reports"
-                />
+                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Reports" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

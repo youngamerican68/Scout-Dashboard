@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { FileText, Search, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { ScoutTabs, useScout } from "@/components/scout-tabs";
 
 interface Report {
   id: string;
@@ -20,26 +21,31 @@ interface Report {
 
 export default function ReportsPage() {
   const router = useRouter();
+  const { sourceFilter, labels, scout } = useScout();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
+    setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
+    params.set("source", sourceFilter);
     fetch(`/api/reports?${params}`)
       .then((res) => res.json())
       .then((data) => setReports(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [search]);
+  }, [search, sourceFilter]);
 
   return (
     <div className="space-y-6">
+      <ScoutTabs />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Scout Reports</h1>
-          <p className="text-slate-400 mt-1">Daily reports from Clawdbot&apos;s Twitter &amp; Discord scouting</p>
+          <p className="text-slate-400 mt-1">Daily reports from Clawdbot&apos;s {labels.description}</p>
         </div>
       </div>
 
@@ -68,7 +74,7 @@ export default function ReportsPage() {
       ) : (
         <div className="space-y-3">
           {reports.map((report) => (
-            <Card key={report.id} className="hover:border-slate-600 transition-colors cursor-pointer" onClick={() => router.push(`/reports/${report.id}`)}>
+            <Card key={report.id} className="hover:border-slate-600 transition-colors cursor-pointer" onClick={() => router.push(`/reports/${report.id}?scout=${scout}`)}>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
@@ -80,8 +86,8 @@ export default function ReportsPage() {
                         {format(new Date(report.date), "MMM d, yyyy")}
                       </span>
                       <Badge variant="secondary">{report.source}</Badge>
-                      {report.tweetCount != null && (
-                        <span>{report.tweetCount} posts</span>
+                      {report.tweetCount != null && report.tweetCount > 0 && (
+                        <span>{report.tweetCount} {labels.itemLabel}</span>
                       )}
                     </div>
                   </div>

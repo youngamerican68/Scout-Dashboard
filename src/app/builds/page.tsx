@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Hammer } from "lucide-react";
+import { ScoutTabs } from "@/components/scout-tabs";
 
 interface Build {
   name?: string;
@@ -27,6 +28,8 @@ export default function BuildsPage() {
 
   return (
     <div className="space-y-6">
+      <ScoutTabs />
+
       <div>
         <h1 className="text-2xl font-bold text-white">Builds</h1>
         <p className="text-slate-400 mt-1">Active builds in the queue</p>

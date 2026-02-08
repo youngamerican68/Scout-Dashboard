@@ -66,7 +66,10 @@ function parseMarkdownReport(content) {
 
   // Detect source
   const lowerContent = content.toLowerCase();
-  const source = lowerContent.includes('discord') ? 'discord' : 'twitter';
+  const isJournal = lowerContent.includes('journal') || lowerContent.includes('pubmed') ||
+    lowerContent.includes('semantic scholar') || lowerContent.includes('doi:') ||
+    lowerContent.includes('longevity') && lowerContent.includes('paper');
+  const source = isJournal ? 'journal' : lowerContent.includes('discord') ? 'discord' : 'twitter';
 
   // Count tweets/posts mentioned
   const tweetMatch = content.match(/(\d+)\s*(tweets?|posts?|results?)/i);
