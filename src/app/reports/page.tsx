@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { FileText, Search, Calendar } from "lucide-react";
+import { FileText, Search, Calendar, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ScoutTabs, useScout } from "@/components/scout-tabs";
 
@@ -25,6 +25,20 @@ export default function ReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const deleteReport = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!confirm("Delete this report and all its opportunities?")) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`/api/reports/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setReports((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch {}
+    setDeleting(null);
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -91,9 +105,18 @@ export default function ReportsPage() {
                       )}
                     </div>
                   </div>
-                  <Badge variant="default">
-                    {report._count.opportunities} opp{report._count.opportunities !== 1 ? "s" : ""}
-                  </Badge>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant="default">
+                      {report._count.opportunities} opp{report._count.opportunities !== 1 ? "s" : ""}
+                    </Badge>
+                    <button
+                      onClick={(e) => deleteReport(e, report.id)}
+                      disabled={deleting === report.id}
+                      className="p-1.5 rounded-md text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -71,3 +71,37 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    // Delete linked builds first, then opportunities, then the report
+    await prisma.$transaction(async (tx) => {
+      const opportunities = await tx.opportunity.findMany({
+        where: { reportId: id },
+        select: { id: true },
+      });
+
+      if (opportunities.length > 0) {
+        await tx.build.deleteMany({
+          where: { opportunityId: { in: opportunities.map((o) => o.id) } },
+        });
+        await tx.opportunity.deleteMany({ where: { reportId: id } });
+      }
+
+      await tx.scoutReport.delete({ where: { id } });
+    });
+
+    return NextResponse.json({ message: "Report deleted" });
+  } catch (error) {
+    console.error("Failed to delete report:", error);
+    return NextResponse.json(
+      { error: "Failed to delete report" },
+      { status: 500 }
+    );
+  }
+}
