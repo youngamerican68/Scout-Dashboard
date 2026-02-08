@@ -30,8 +30,9 @@ const statusVariant: Record<string, "default" | "success" | "warning" | "seconda
 
 const priorityVariant: Record<string, "destructive" | "warning" | "secondary"> = {
   build_now: "destructive",
-  explore: "warning",
+  backlog: "warning",
   monitor: "secondary",
+  skip: "secondary",
 };
 
 export default function OpportunitiesPage() {
@@ -94,8 +95,9 @@ export default function OpportunitiesPage() {
         <Select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
           <option value="">All priorities</option>
           <option value="build_now">Build Now</option>
-          <option value="explore">Explore</option>
+          <option value="backlog">Backlog</option>
           <option value="monitor">Monitor</option>
+          <option value="skip">Skip</option>
         </Select>
       </div>
 
@@ -139,8 +141,9 @@ export default function OpportunitiesPage() {
                         className="w-auto text-xs h-7 py-0 px-2"
                       >
                         <option value="build_now">Build Now</option>
-                        <option value="explore">Explore</option>
+                        <option value="backlog">Backlog</option>
                         <option value="monitor">Monitor</option>
+                        <option value="skip">Skip</option>
                       </Select>
                       {opp.report && (
                         <a

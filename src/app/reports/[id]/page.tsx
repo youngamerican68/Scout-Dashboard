@@ -38,8 +38,9 @@ const statusVariant: Record<string, "default" | "success" | "warning" | "seconda
 
 const priorityVariant: Record<string, "destructive" | "warning" | "secondary"> = {
   build_now: "destructive",
-  explore: "warning",
+  backlog: "warning",
   monitor: "secondary",
+  skip: "secondary",
 };
 
 export default function ReportDetailPage() {

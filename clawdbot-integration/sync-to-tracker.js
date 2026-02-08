@@ -96,13 +96,14 @@ function parseMarkdownReport(content) {
     const sectionBody = section.replace(/^#{1,3}\s*.+\n/, '').trim();
     if (sectionBody.length > 20) {
       // Determine priority from Clawdbot's Priority: line, or fallback to keyword detection
-      let priority = 'explore';
-      const priorityLine = section.match(/Priority:\s*(?:🔴|🟡|⚪|🟢)?\s*(.+)/i);
+      let priority = 'backlog';
+      const priorityLine = section.match(/Priority:\s*(?:🔴|🟡|⚪|⛔|🟢)?\s*(.+)/i);
       if (priorityLine) {
         const p = priorityLine[1].toLowerCase();
         if (/build now|immediate/i.test(p)) priority = 'build_now';
+        else if (/skip|none|dismiss|not a build/i.test(p)) priority = 'skip';
         else if (/monitor|watch|track/i.test(p)) priority = 'monitor';
-        else if (/explore|investigate|research/i.test(p)) priority = 'explore';
+        else if (/backlog|add to backlog|explore|investigate/i.test(p)) priority = 'backlog';
       } else {
         if (/build now|high priority|urgent/i.test(section)) priority = 'build_now';
         if (/low priority|maybe|someday|monitor/i.test(section)) priority = 'monitor';
@@ -137,7 +138,7 @@ function parseJsonReport(content) {
       title: (item.title || item.name || item.whatItIs || 'Untitled'),
       description: (item.description || item.opportunity || item.summary || ''),
       source,
-      priority: (item.priority || item.difficulty === 'easy' ? 'build_now' : 'explore'),
+      priority: (item.priority || item.difficulty === 'easy' ? 'build_now' : 'backlog'),
     });
   }
 
