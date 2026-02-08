@@ -324,7 +324,7 @@ async function main() {
     businessPapers.push(...papers);
     console.log(`  "${query}" → ${papers.length} results`);
     totalPapers += papers.length;
-    await sleep(1100); // Semantic Scholar: 1 req/sec for unauthenticated
+    await sleep(2000); // Semantic Scholar: 1 req/sec for unauthenticated, extra buffer
   }
 
   // Deduplicate
