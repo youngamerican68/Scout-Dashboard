@@ -3,9 +3,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { MessageSquare, BookOpen } from "lucide-react";
+import { MessageSquare, BookOpen, Mic } from "lucide-react";
 
-type ScoutType = "twitter" | "journal";
+type ScoutType = "twitter" | "journal" | "podcast";
 
 interface PriorityOption {
   value: string;
@@ -60,6 +60,18 @@ const LABELS: Record<ScoutType, ScoutLabels> = {
     ],
     priorityLabel: { build_now: "actionable", backlog: "interesting", monitor: "background" },
   },
+  podcast: {
+    itemsScanned: "Episodes Scanned",
+    itemLabel: "episodes",
+    description: "Podcast scouting",
+    priorities: [
+      { value: "build_now", label: "Build Now" },
+      { value: "backlog", label: "Backlog" },
+      { value: "monitor", label: "Monitor" },
+      { value: "skip", label: "Skip" },
+    ],
+    priorityLabel: { build_now: "build now", backlog: "backlog", monitor: "monitor", skip: "skip" },
+  },
 };
 
 export function ScoutProvider({ children }: { children: ReactNode }) {
@@ -79,12 +91,12 @@ export function ScoutProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const param = searchParams.get("scout") as ScoutType;
-    if (param && (param === "twitter" || param === "journal")) {
+    if (param && (param === "twitter" || param === "journal" || param === "podcast")) {
       setScoutState(param);
     }
   }, [searchParams]);
 
-  const sourceFilter = scout === "twitter" ? "twitter,discord,podcast" : "journal";
+  const sourceFilter = scout === "twitter" ? "twitter,discord" : scout === "podcast" ? "podcast" : "journal";
 
   return (
     <ScoutContext.Provider value={{ scout, setScout, sourceFilter, labels: LABELS[scout] }}>
@@ -98,6 +110,7 @@ export function ScoutTabs() {
 
   const tabs: { id: ScoutType; label: string; icon: typeof MessageSquare }[] = [
     { id: "twitter", label: "Twitter Scout", icon: MessageSquare },
+    { id: "podcast", label: "Podcast Scout", icon: Mic },
     { id: "journal", label: "Journal Scout", icon: BookOpen },
   ];
 
