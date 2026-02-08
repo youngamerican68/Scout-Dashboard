@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
-import { Lightbulb } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Lightbulb, Hammer } from "lucide-react";
 import { format } from "date-fns";
 import { Markdown } from "@/components/markdown";
 import { ScoutTabs, useScout } from "@/components/scout-tabs";
@@ -19,6 +20,7 @@ interface Opportunity {
   notes: string | null;
   updatedAt: string;
   report: { id: string; title: string; source: string } | null;
+  build: { id: string; status: string } | null;
 }
 
 const statusVariant: Record<string, "default" | "success" | "warning" | "secondary"> = {
@@ -41,6 +43,7 @@ export default function OpportunitiesPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
+  const [sendingBuild, setSendingBuild] = useState<string | null>(null);
 
   const fetchOpportunities = useCallback(() => {
     setLoading(true);
@@ -73,6 +76,26 @@ export default function OpportunitiesPage() {
         );
       }
     } catch {}
+  };
+
+  const sendToBuild = async (oppId: string) => {
+    setSendingBuild(oppId);
+    try {
+      const res = await fetch("/api/builds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ opportunityId: oppId }),
+      });
+      if (res.ok) {
+        const build = await res.json();
+        setOpportunities((prev) =>
+          prev.map((o) =>
+            o.id === oppId ? { ...o, status: "in_progress", build: { id: build.id, status: build.status } } : o
+          )
+        );
+      }
+    } catch {}
+    setSendingBuild(null);
   };
 
   return (
@@ -143,6 +166,27 @@ export default function OpportunitiesPage() {
                           <option key={p.value} value={p.value}>{p.label}</option>
                         ))}
                       </Select>
+                      {!opp.build && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                          onClick={() => sendToBuild(opp.id)}
+                          disabled={sendingBuild === opp.id}
+                        >
+                          <Hammer className="h-3.5 w-3.5 mr-1" />
+                          {sendingBuild === opp.id ? "Sending..." : "Build"}
+                        </Button>
+                      )}
+                      {opp.build && (
+                        <a
+                          href={`/builds/${opp.build.id}`}
+                          className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                        >
+                          <Hammer className="h-3 w-3" />
+                          {opp.build.status}
+                        </a>
+                      )}
                       {opp.report && (
                         <a
                           href={`/reports/${opp.report.id}?scout=${scout}`}

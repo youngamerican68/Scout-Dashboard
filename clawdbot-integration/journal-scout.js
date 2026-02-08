@@ -31,27 +31,22 @@ const MAX_PER_QUERY = 10;
 // --- Search Queries ---
 
 const HEALTH_QUERIES = [
-  "longevity intervention human",
-  "aging reversal therapy",
-  "metabolic health biomarker",
-  "cognitive enhancement supplement",
-  "mental health treatment novel",
-  "sleep optimization",
-  "exercise physiology aging",
-  "nutrition longevity",
-  "gut microbiome health",
-  "stress resilience psychology",
+  "dietary supplement longevity aging",
+  "nutraceutical healthspan lifespan",
+  "caloric restriction intermittent fasting longevity",
+  "exercise protocol aging biomarker",
+  "sleep quality longevity lifestyle",
+  "microbiome supplement prebiotic probiotic",
+  "resveratrol NMN NAD supplement",
+  "lifestyle intervention biological age",
 ];
 
 const BUSINESS_QUERIES = [
-  "artificial intelligence product application",
-  "automation workflow software",
-  "biotechnology commercial application",
-  "wearable health technology",
-  "personalized medicine platform",
-  "energy storage innovation",
-  "human computer interaction design",
-  "natural language processing application",
+  "contrarian strategy business model disruption",
+  "unconventional entrepreneurship market opportunity",
+  "counterintuitive business innovation",
+  "solo founder bootstrapping scalable",
+  "niche market underserved business opportunity",
 ];
 
 // --- HTTP Helpers ---
@@ -143,7 +138,7 @@ function parsePubMedXml(xml) {
     if (abstract.length > 50) {
       papers.push({
         title,
-        abstract: abstract.slice(0, 1000),
+        abstract: abstract,
         journal,
         authors: authors ? (authorMatches.length > 3 ? `${authors} et al.` : authors) : "Unknown",
         pubDate,
@@ -186,7 +181,7 @@ async function searchSemanticScholar(query, daysBack) {
       .filter((p) => p.abstract && p.abstract.length > 50)
       .map((p) => ({
         title: p.title || "Untitled",
-        abstract: (p.abstract || "").slice(0, 1000),
+        abstract: p.abstract || "",
         journal: p.venue || "Preprint",
         authors: (p.authors || [])
           .slice(0, 3)
@@ -220,65 +215,56 @@ function dedup(papers) {
 
 // --- Report Generation ---
 
-function generateReport(healthPapers, businessPapers, stats) {
+function generateHealthReport(papers) {
   const date = new Date().toISOString().slice(0, 10);
   const lines = [];
 
-  lines.push(`# Journal Scout Report — ${date}`);
+  lines.push(`# Health & Longevity — ${date}`);
   lines.push("");
   lines.push(
-    `Scanned ${stats.totalPapers} papers from PubMed and Semantic Scholar (last ${DAYS_BACK} days). ` +
-    `Found ${healthPapers.length} health/longevity insights and ${businessPapers.length} business opportunities.`
+    `${papers.length} papers on supplements, lifestyle, and longevity from PubMed (last ${DAYS_BACK} days).`
   );
   lines.push("");
 
-  // Health section
-  lines.push("---");
-  lines.push("");
-  lines.push("## Health & Longevity Insights");
-  lines.push("");
-
-  if (healthPapers.length === 0) {
-    lines.push("No notable papers found this period.");
+  for (const paper of papers) {
+    lines.push(`### ${paper.title}`);
     lines.push("");
-  } else {
-    for (const paper of healthPapers) {
-      lines.push(`### ${paper.title}`);
-      lines.push("");
-      lines.push(
-        `**${paper.journal}** | ${paper.authors} | ${paper.pubDate}`
-      );
-      lines.push(`**Link:** ${paper.doi}`);
-      lines.push("");
-      lines.push(paper.abstract);
-      lines.push("");
-      lines.push("---");
-      lines.push("");
-    }
+    lines.push(`**${paper.journal}** | ${paper.authors} | ${paper.pubDate}`);
+    lines.push(`**Link:** ${paper.doi}`);
+    lines.push("");
+    lines.push(paper.abstract);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
   }
 
-  // Business section
-  lines.push("## Business & Product Opportunities");
+  return lines.join("\n");
+}
+
+function generateBusinessReport(papers) {
+  const date = new Date().toISOString().slice(0, 10);
+  const lines = [];
+
+  lines.push(`# Business & Contrarian Ideas — ${date}`);
+  lines.push("");
+  lines.push(
+    `${papers.length} papers on unconventional business strategies from Semantic Scholar (last ${DAYS_BACK} days).`
+  );
   lines.push("");
 
-  if (businessPapers.length === 0) {
-    lines.push("No notable papers found this period.");
+  for (const paper of papers) {
+    lines.push(`### ${paper.title}`);
     lines.push("");
-  } else {
-    for (const paper of businessPapers) {
-      lines.push(`### ${paper.title}`);
-      lines.push("");
-      lines.push(
-        `**${paper.journal}** | ${paper.authors} | ${paper.pubDate}` +
-        (paper.citations ? ` | ${paper.citations} citations` : "")
-      );
-      lines.push(`**Link:** ${paper.doi}`);
-      lines.push("");
-      lines.push(paper.abstract);
-      lines.push("");
-      lines.push("---");
-      lines.push("");
-    }
+    lines.push(
+      `**${paper.journal}** | ${paper.authors} | ${paper.pubDate}` +
+      (paper.citations ? ` | ${paper.citations} citations` : "")
+    );
+    lines.push(`**Link:** ${paper.doi}`);
+    lines.push("");
+    lines.push(paper.abstract);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
   }
 
   return lines.join("\n");
@@ -331,40 +317,46 @@ async function main() {
   businessPapers = dedup(businessPapers);
   console.log(`  Unique business papers: ${businessPapers.length}`);
 
-  // 3. Generate report
-  const report = generateReport(
-    dedup(healthPapers).slice(0, 15),
-    businessPapers.slice(0, 15),
-    { totalPapers }
-  );
+  // 3. Generate separate reports
+  const dedupedHealth = dedup(healthPapers).slice(0, 15);
+  const dedupedBusiness = businessPapers.slice(0, 15);
 
   const date = new Date().toISOString().slice(0, 10);
-  const filename = `journal-report-${date}.md`;
-  const filepath = path.join(REPORTS_DIR, filename);
+  const reports = [];
 
-  fs.writeFileSync(filepath, report);
-  console.log("");
-  console.log(`Report saved: ${filepath}`);
-  console.log(
-    `  ${dedup(healthPapers).length} health papers, ${businessPapers.length} business papers`
-  );
+  if (dedupedHealth.length > 0) {
+    const healthReport = generateHealthReport(dedupedHealth);
+    const healthFile = path.join(REPORTS_DIR, `health-longevity-${date}.md`);
+    fs.writeFileSync(healthFile, healthReport);
+    reports.push(healthFile);
+    console.log(`\nHealth report saved: ${healthFile} (${dedupedHealth.length} papers)`);
+  }
 
-  // 4. Auto-sync if sync script is available
+  if (dedupedBusiness.length > 0) {
+    const businessReport = generateBusinessReport(dedupedBusiness);
+    const businessFile = path.join(REPORTS_DIR, `business-ideas-${date}.md`);
+    fs.writeFileSync(businessFile, businessReport);
+    reports.push(businessFile);
+    console.log(`Business report saved: ${businessFile} (${dedupedBusiness.length} papers)`);
+  }
+
+  // 4. Auto-sync each report separately
   const syncScript = path.join(
     "/root/.openclaw/workspace/twitter-scout",
     "sync-to-tracker.js"
   );
   if (fs.existsSync(syncScript) && process.env.SCOUT_TRACKER_URL) {
-    console.log("");
-    console.log("Syncing to Scout Tracker dashboard...");
-    try {
-      const { execSync } = require("child_process");
-      execSync(`node "${syncScript}" "${filepath}"`, {
-        stdio: "inherit",
-        timeout: 30000,
-      });
-    } catch (err) {
-      console.error("Sync failed:", err.message);
+    const { execSync } = require("child_process");
+    for (const filepath of reports) {
+      console.log(`\nSyncing ${path.basename(filepath)}...`);
+      try {
+        execSync(`node "${syncScript}" "${filepath}"`, {
+          stdio: "inherit",
+          timeout: 30000,
+        });
+      } catch (err) {
+        console.error("Sync failed:", err.message);
+      }
     }
   }
 }

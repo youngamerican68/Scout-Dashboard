@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       orderBy: { updatedAt: "desc" },
       include: {
         report: true,
+        build: { select: { id: true, status: true } },
       },
     });
 

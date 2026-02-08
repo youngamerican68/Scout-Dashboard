@@ -84,7 +84,7 @@ export function ScoutProvider({ children }: { children: ReactNode }) {
     }
   }, [searchParams]);
 
-  const sourceFilter = scout === "twitter" ? "twitter,discord" : "journal";
+  const sourceFilter = scout === "twitter" ? "twitter,discord,podcast" : "journal";
 
   return (
     <ScoutContext.Provider value={{ scout, setScout, sourceFilter, labels: LABELS[scout] }}>

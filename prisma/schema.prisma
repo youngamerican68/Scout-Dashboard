@@ -32,16 +32,20 @@ model Opportunity {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   report      ScoutReport? @relation(fields: [reportId], references: [id])
+  build       Build?
 }
 
 model Build {
-  id          String    @id @default(uuid())
-  projectName String
-  status      String
-  prdContent  String?
-  deployUrl   String?
-  queuedAt    DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            String       @id @default(uuid())
+  projectName   String
+  status        String       @default("pending")
+  prdContent    String?
+  errorMessage  String?
+  deployUrl     String?
+  queuedAt      DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  opportunityId String?      @unique
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
 }

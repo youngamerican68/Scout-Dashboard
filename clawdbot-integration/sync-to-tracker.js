@@ -69,7 +69,8 @@ function parseMarkdownReport(content) {
   const isJournal = lowerContent.includes('journal') || lowerContent.includes('pubmed') ||
     lowerContent.includes('semantic scholar') || lowerContent.includes('doi:') ||
     lowerContent.includes('longevity') && lowerContent.includes('paper');
-  const source = isJournal ? 'journal' : lowerContent.includes('discord') ? 'discord' : 'twitter';
+  const isPodcast = lowerContent.includes('podcast') || lowerContent.includes('transcript');
+  const source = isJournal ? 'journal' : isPodcast ? 'podcast' : lowerContent.includes('discord') ? 'discord' : 'twitter';
 
   // Count tweets/posts mentioned
   const tweetMatch = content.match(/(\d+)\s*(tweets?|posts?|results?)/i);
