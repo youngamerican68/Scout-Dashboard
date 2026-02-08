@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {};
 
     if (source) {
-      where.source = source;
+      const sources = source.split(",");
+      where.source = sources.length > 1 ? { in: sources } : source;
     }
 
     if (search) {

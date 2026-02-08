@@ -4,8 +4,11 @@ import prisma from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   try {
     const source = new URL(request.url).searchParams.get("source");
-    const reportWhere = source ? { source } : {};
-    const oppWhere = source ? { source } : {};
+    const sourceFilter = source
+      ? source.includes(",") ? { in: source.split(",") } : source
+      : undefined;
+    const reportWhere = sourceFilter ? { source: sourceFilter } : {};
+    const oppWhere = sourceFilter ? { source: sourceFilter } : {};
 
     const [totalReports, totalOpportunities, tweetAgg, reportsOverTime, activeBuildCount, recentReports, recentOpportunities] =
       await Promise.all([
@@ -85,7 +88,9 @@ async function getReportsOverTime(source: string | null) {
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
   const where: Record<string, unknown> = { date: { gte: sixMonthsAgo } };
-  if (source) where.source = source;
+  if (source) {
+    where.source = source.includes(",") ? { in: source.split(",") } : source;
+  }
 
   const reports = await prisma.scoutReport.findMany({
     where,
