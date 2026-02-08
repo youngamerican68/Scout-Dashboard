@@ -211,7 +211,7 @@ export default function Dashboard() {
                           {opp.status.replace("_", " ")}
                         </Badge>
                         <Badge variant={priorityVariant[opp.priority] ?? "secondary"} className="text-[10px] px-1.5 py-0">
-                          {opp.priority}
+                          {labels.priorityLabel[opp.priority] ?? opp.priority}
                         </Badge>
                       </div>
                     </div>

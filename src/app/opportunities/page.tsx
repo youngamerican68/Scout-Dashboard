@@ -94,10 +94,9 @@ export default function OpportunitiesPage() {
         </Select>
         <Select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
           <option value="">All priorities</option>
-          <option value="build_now">Build Now</option>
-          <option value="backlog">Backlog</option>
-          <option value="monitor">Monitor</option>
-          <option value="skip">Skip</option>
+          {labels.priorities.map((p) => (
+            <option key={p.value} value={p.value}>{p.label}</option>
+          ))}
         </Select>
       </div>
 
@@ -140,10 +139,9 @@ export default function OpportunitiesPage() {
                         onChange={(e) => updateOpportunity(opp.id, "priority", e.target.value)}
                         className="w-auto text-xs h-7 py-0 px-2"
                       >
-                        <option value="build_now">Build Now</option>
-                        <option value="backlog">Backlog</option>
-                        <option value="monitor">Monitor</option>
-                        <option value="skip">Skip</option>
+                        {labels.priorities.map((p) => (
+                          <option key={p.value} value={p.value}>{p.label}</option>
+                        ))}
                       </Select>
                       {opp.report && (
                         <a

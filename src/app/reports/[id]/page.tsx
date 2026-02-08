@@ -126,7 +126,7 @@ export default function ReportDetailPage() {
                           {opp.status.replace("_", " ")}
                         </Badge>
                         <Badge variant={priorityVariant[opp.priority] ?? "secondary"}>
-                          {opp.priority}
+                          {labels.priorityLabel[opp.priority] ?? opp.priority}
                         </Badge>
                       </div>
                     </div>

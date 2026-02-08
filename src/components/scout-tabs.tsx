@@ -7,32 +7,58 @@ import { MessageSquare, BookOpen } from "lucide-react";
 
 type ScoutType = "twitter" | "journal";
 
+interface PriorityOption {
+  value: string;
+  label: string;
+}
+
+interface ScoutLabels {
+  itemsScanned: string;
+  itemLabel: string;
+  description: string;
+  priorities: PriorityOption[];
+  priorityLabel: Record<string, string>;
+}
+
 const ScoutContext = createContext<{
   scout: ScoutType;
   setScout: (s: ScoutType) => void;
   sourceFilter: string;
-  labels: { itemsScanned: string; itemLabel: string; description: string };
+  labels: ScoutLabels;
 }>({
   scout: "twitter",
   setScout: () => {},
   sourceFilter: "twitter",
-  labels: { itemsScanned: "Tweets Scanned", itemLabel: "posts", description: "Twitter & Discord scouting" },
+  labels: {} as ScoutLabels,
 });
 
 export function useScout() {
   return useContext(ScoutContext);
 }
 
-const LABELS: Record<ScoutType, { itemsScanned: string; itemLabel: string; description: string }> = {
+const LABELS: Record<ScoutType, ScoutLabels> = {
   twitter: {
     itemsScanned: "Tweets Scanned",
     itemLabel: "posts",
     description: "Twitter & Discord scouting",
+    priorities: [
+      { value: "build_now", label: "Build Now" },
+      { value: "backlog", label: "Backlog" },
+      { value: "monitor", label: "Monitor" },
+      { value: "skip", label: "Skip" },
+    ],
+    priorityLabel: { build_now: "build now", backlog: "backlog", monitor: "monitor", skip: "skip" },
   },
   journal: {
     itemsScanned: "Papers Scanned",
     itemLabel: "papers",
     description: "Academic journal scouting",
+    priorities: [
+      { value: "build_now", label: "Actionable" },
+      { value: "backlog", label: "Interesting" },
+      { value: "monitor", label: "Background" },
+    ],
+    priorityLabel: { build_now: "actionable", backlog: "interesting", monitor: "background" },
   },
 };
 
