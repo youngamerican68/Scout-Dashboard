@@ -188,6 +188,11 @@ async function main() {
     process.exit(1);
   }
 
+  // Override source based on file path (more reliable than content detection)
+  if (fullPath.includes('podcast-scout')) parsed.source = 'podcast';
+  else if (fullPath.includes('journal-scout')) parsed.source = 'journal';
+  else if (fullPath.includes('twitter-scout')) parsed.source = 'twitter';
+
   console.log(`Syncing: "${parsed.title}" (${parsed.opportunities.length} opportunities)`);
 
   // 1. Create the scout report
