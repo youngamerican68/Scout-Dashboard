@@ -97,7 +97,7 @@ export default function ReportsPage() {
                     <div className="flex items-center gap-3 mt-3 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {format(new Date(report.date), "MMM d, yyyy")}
+                        {format(new Date(report.date.replace("T00:00:00.000Z", "T12:00:00.000Z")), "MMM d, yyyy")}
                       </span>
                       <Badge variant="secondary">{report.source}</Badge>
                       {report.tweetCount != null && report.tweetCount > 0 && (

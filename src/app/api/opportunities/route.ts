@@ -8,8 +8,17 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const priority = searchParams.get("priority");
     const source = searchParams.get("source");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
     const where: Record<string, unknown> = {};
+
+    if (startDate || endDate) {
+      const createdAtFilter: Record<string, Date> = {};
+      if (startDate) createdAtFilter.gte = new Date(startDate + "T00:00:00.000Z");
+      if (endDate) createdAtFilter.lte = new Date(endDate + "T23:59:59.999Z");
+      where.createdAt = createdAtFilter;
+    }
 
     if (source) {
       const sources = source.split(",");

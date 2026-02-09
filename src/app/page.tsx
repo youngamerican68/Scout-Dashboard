@@ -175,7 +175,7 @@ export default function Dashboard() {
                         <p className="text-sm font-medium text-white truncate">{report.title}</p>
                         <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(report.date), "MMM d")}
+                          {format(new Date(report.date.replace("T00:00:00.000Z", "T12:00:00.000Z")), "MMM d")}
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{report.source}</Badge>
                         </div>
                       </div>
