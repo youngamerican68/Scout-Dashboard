@@ -64,13 +64,17 @@ function parseMarkdownReport(content) {
   const titleLine = lines.find(l => l.startsWith('# '));
   const title = titleLine ? titleLine.replace(/^#+\s*/, '').trim() : 'Scout Report';
 
-  // Detect source
+  // Detect source — order matters: check twitter/discord first (most reports), then journal, then podcast
   const lowerContent = content.toLowerCase();
-  const isJournal = lowerContent.includes('journal') || lowerContent.includes('pubmed') ||
+  const lowerTitle = title.toLowerCase();
+  const isTwitter = lowerContent.includes('tweets') || lowerContent.includes('twitter') ||
+    lowerTitle.includes('ai scout report') || lowerContent.includes('tweet');
+  const isJournal = lowerContent.includes('pubmed') ||
     lowerContent.includes('semantic scholar') || lowerContent.includes('doi:') ||
-    lowerContent.includes('longevity') && lowerContent.includes('paper');
-  const isPodcast = lowerContent.includes('podcast') || lowerContent.includes('transcript');
-  const source = isJournal ? 'journal' : isPodcast ? 'podcast' : lowerContent.includes('discord') ? 'discord' : 'twitter';
+    (lowerTitle.includes('longevity') || lowerTitle.includes('health')) && lowerContent.includes('paper');
+  const isPodcast = lowerTitle.includes('podcast') ||
+    (lowerContent.includes('podcast scout') || lowerContent.includes('podcast transcripts'));
+  const source = isJournal ? 'journal' : isTwitter ? 'twitter' : isPodcast ? 'podcast' : lowerContent.includes('discord') ? 'discord' : 'twitter';
 
   // Count tweets/posts/transcripts mentioned
   const tweetMatch = content.match(/(\d+)\s*(tweets?|posts?|results?|transcripts?|episodes?|papers?)/i);
@@ -97,6 +101,8 @@ function parseMarkdownReport(content) {
     if (!sectionTitle) continue;
 
     const heading = sectionTitle[1].trim();
+    // Skip the report title (first # heading, same as extracted title)
+    if (heading.replace(/[🪶🔥📊]/g, '').trim() === title.replace(/[🪶🔥📊]/g, '').trim()) continue;
     // Stop extracting once we hit pattern summary or opportunities recap
     if (/pattern summary|opportunities\s*\(|bottom line/i.test(heading)) {
       reachedEnd = true;
