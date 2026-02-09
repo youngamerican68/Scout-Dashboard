@@ -24,7 +24,7 @@ const REPORTS_DIR =
 
 const DAYS_BACK = parseInt(process.argv.find((a) => a === "--days")
   ? process.argv[process.argv.indexOf("--days") + 1]
-  : "7", 10);
+  : "3", 10);
 
 const MAX_PER_QUERY = 10;
 
