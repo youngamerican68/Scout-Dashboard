@@ -3,9 +3,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { MessageSquare, BookOpen, Mic, Globe } from "lucide-react";
+import { MessageSquare, BookOpen, Mic, Globe, Newspaper } from "lucide-react";
 
-type ScoutType = "twitter" | "journal" | "podcast" | "research";
+type ScoutType = "twitter" | "journal" | "podcast" | "research" | "smol";
 
 interface PriorityOption {
   value: string;
@@ -84,6 +84,18 @@ const LABELS: Record<ScoutType, ScoutLabels> = {
     ],
     priorityLabel: { build_now: "build now", backlog: "backlog", monitor: "monitor", skip: "skip" },
   },
+  smol: {
+    itemsScanned: "Articles Scanned",
+    itemLabel: "articles",
+    description: "smol.ai newsletter scouting",
+    priorities: [
+      { value: "build_now", label: "Build Now" },
+      { value: "backlog", label: "Backlog" },
+      { value: "monitor", label: "Monitor" },
+      { value: "skip", label: "Skip" },
+    ],
+    priorityLabel: { build_now: "build now", backlog: "backlog", monitor: "monitor", skip: "skip" },
+  },
 };
 
 export function ScoutProvider({ children }: { children: ReactNode }) {
@@ -103,12 +115,12 @@ export function ScoutProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const param = searchParams.get("scout") as ScoutType;
-    if (param && (param === "twitter" || param === "journal" || param === "podcast" || param === "research")) {
+    if (param && (param === "twitter" || param === "journal" || param === "podcast" || param === "research" || param === "smol")) {
       setScoutState(param);
     }
   }, [searchParams]);
 
-  const sourceFilter = scout === "twitter" ? "twitter,discord" : scout === "research" ? "research" : scout === "podcast" ? "podcast" : "journal";
+  const sourceFilter = scout === "twitter" ? "twitter,discord" : scout === "research" ? "research" : scout === "smol" ? "smol" : scout === "podcast" ? "podcast" : "journal";
 
   return (
     <ScoutContext.Provider value={{ scout, setScout, sourceFilter, labels: LABELS[scout] }}>
@@ -121,10 +133,11 @@ export function ScoutTabs() {
   const { scout, setScout } = useScout();
 
   const tabs: { id: ScoutType; label: string; icon: typeof MessageSquare }[] = [
-    { id: "twitter", label: "Twitter Scout", icon: MessageSquare },
-    { id: "research", label: "Research Scout", icon: Globe },
-    { id: "podcast", label: "Podcast Scout", icon: Mic },
-    { id: "journal", label: "Journal Scout", icon: BookOpen },
+    { id: "twitter", label: "Twitter", icon: MessageSquare },
+    { id: "smol", label: "Smol", icon: Newspaper },
+    { id: "research", label: "Research", icon: Globe },
+    { id: "podcast", label: "Podcast", icon: Mic },
+    { id: "journal", label: "Journal", icon: BookOpen },
   ];
 
   return (
